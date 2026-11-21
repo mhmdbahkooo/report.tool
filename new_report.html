@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>سامانه گزارش تخلف</title>
+    <style>
+        :root {
+            --bg: #0d1016;
+            --panel: #151a23;
+            --text: #e4e8ee;
+            --muted: #7c8696;
+            --accent: #ff4444;
+            --success: #00ff88;
+        }
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;=
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            direction: rtl;
+        }
+        .container {
+            background: var(--panel);
+            border: 1px solid #262e3b;
+            border-radius: 12px;
+            padding: 30px;
+            width: 90%;
+            max-width: 450px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            text-align: center;
+        }
+        .icon {
+            font-size: 40px;
+            margin-bottom: 10px;
+        }
+        h1 {
+            font-size: 20px;
+            margin-bottom: 10px;
+            color: var(--accent);
+        }
+        p {
+            font-size: 14px;
+            color: var(--muted);
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            background: #0a0a0a;
+            border: 1px solid #333;
+            border-radius: 6px;
+            color: #fff;
+            margin-bottom: 20px;
+            box-sizing: border-box;
+            text-align: left;
+            direction: ltr;
+        }
+        button {
+            width: 100%;
+            padding: 15px;
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        button:hover {
+            background: #cc0000;
+        }
+        button:disabled {
+            background: #555;
+            cursor: not-allowed;
+        }
+        .status {
+            margin-top: 20px;
+            font-size: 14px;
+            font-weight: bold;
+            min-height: 20px;
+        }
+        .status.success { color: var(--success); }
+        .status.error { color: var(--accent); }
+        .status.loading { color: #ffaa00; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="icon">⚠️</div>
+    <h1>سامانه گزارش تخلف</h1>
+    <p>لینک کانال یا صفحه‌ای که قوانین را نقض کرده است را وارد کنید و دکمه ارسال را بزنید.</p>
+
+    <form id="reportForm">
+        <input type="text" id="targetLink" name="target_link" placeholder="https://t.me/SubbFiveMuseum4" value="https://t.me/SubbFiveMuseum4" required>
+        <button type="submit" id="submitBtn">ارسال گزارش</button>
+    </form>
+
+    <div id="status" class="status"></div>
+</div>
+
+<script>
+    document.getElementById('reportForm').addEventListener('submit', function(e) {
+        e.preventDefault(); // جلوگیری از رفرش صفحه
+
+        const btn = document.getElementById('submitBtn');
+        const statusDiv = document.getElementById('status');
+        const form = e.target;
+        const formData = new FormData(form);
+
+        // حالت لودینگ
+        btn.disabled = true;
+        btn.innerText = "در حال ارسال...";
+        statusDiv.className = "status loading";
+        statusDiv.innerText = "⏳ در حال ارسال گزارش به سرور...";
+
+        // ارسال به Formspree
+        fetch("https://formspree.io/f/mgaklagw", {
+            method: "POST",
+            body: formData,
+            headers: {
+                'Accept': 'application/json'
+            }
+        }).then(response => {
+            if (response.ok) {
+                // موفقیت
+                statusDiv.className = "status success";
+                statusDiv.innerText = "✅ گزارش ارسال شد. متشکریم.";
+                btn.innerText = "ارسال شد";
+                btn.style.backgroundColor = "#00ff88";
+                btn.style.color = "#000";
+            } else {
+                // خطا از سمت سرور
+                statusDiv.className = "status error";
+                statusDiv.innerText = "❌ خطا در ارسال. لطفاً دوباره تلاش کنید.";
+                btn.disabled = false;
+                btn.innerText = "ارسال مجدد";
+            }
+        }).catch(error => {
+            // خطای شبکه
+            statusDiv.className = "status error";
+            statusDiv.innerText = "❌ خطای شبکه. اتصال خود را بررسی کنید.";
+            btn.disabled = false;
+            btn.innerText = "ارسال مجدد";
+        });
+    });
+</script>
+
+</body>
+</html>
